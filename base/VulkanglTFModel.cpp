@@ -898,6 +898,7 @@ void vkglTF::Model::loadNode(vkglTF::Node *parent, const tinygltf::Node &node, u
 					vertexBuffer.push_back(vert);
 				}
 			}
+                        newNode->mode =  primitive.mode;
 			// Indices
 			{
 				const tinygltf::Accessor &accessor = model.accessors[primitive.indices];
@@ -1439,7 +1440,7 @@ void vkglTF::Model::drawNode(Node *node, VkCommandBuffer commandBuffer, uint32_t
 	}
 }
 
-void vkglTF::Model::draw(VkCommandBuffer commandBuffer, uint32_t renderFlags, VkPipelineLayout pipelineLayout, uint32_t bindImageSet)
+void vkglTF::Model::draw(VkCommandBuffer commandBuffer, uint32_t renderFlags, VkPipelineLayout pipelineLayout, uint32_t bindImageSet, int mode)
 {
 	if (!buffersBound) {
 		const VkDeviceSize offsets[1] = {0};
@@ -1447,7 +1448,9 @@ void vkglTF::Model::draw(VkCommandBuffer commandBuffer, uint32_t renderFlags, Vk
 		vkCmdBindIndexBuffer(commandBuffer, indices.buffer, 0, VK_INDEX_TYPE_UINT32);
 	}
 	for (auto& node : nodes) {
+            if(node->mode==mode){
 		drawNode(node, commandBuffer, renderFlags, pipelineLayout, bindImageSet);
+            }
 	}
 }
 

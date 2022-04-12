@@ -443,7 +443,9 @@ namespace vks
 
 	bool UIOverlay::inputFloat(const char *caption, float *value, float step, uint32_t precision)
 	{
-		bool res = ImGui::InputFloat(caption, value, step, step * 10.0f, precision);
+		//bool res = ImGui::InputFloat(caption, value, step, step * 10.0f, precision);
+                //FIXME - change to imgui api
+		bool res = ImGui::InputFloat(caption, value, step, step * 10.0f);
 		if (res) { updated = true; };
 		return res;
 	}
@@ -492,4 +494,11 @@ namespace vks
 		ImGui::TextV(formatstr, args);
 		va_end(args);
 	}
+	bool UIOverlay::color(const char* caption, float* value)
+	{
+		bool res = ImGui::ColorEdit4(caption, value);
+		if (res) { updated = true; };
+		return res;
+	}
+
 }

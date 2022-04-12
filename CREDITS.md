@@ -1,4 +1,6 @@
 ## Credits
+This code is relies entirely upon Vulkan Demos, Copyright (c) 2016 Sascha Willems (github SaschaWillems/Vulkan).
+
 Thanks to the authors of these libraries :
 - [OpenGL Mathematics (GLM)](https://github.com/g-truc/glm)
 

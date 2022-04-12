@@ -234,3 +234,7 @@ data/textures/**
 data/README_asset_pack.md
 data/font*.*
 data/roboto*.*
+
+!data/models/ribbons.gltf
+!data/models/1a3h_ribbons.gltf
+!data/models/1a3h_surface.gltf
