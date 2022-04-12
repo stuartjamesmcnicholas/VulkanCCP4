@@ -50,6 +50,17 @@ from the root of the repository after cloning or see [this](data/README.md) for 
 
 The repository contains everything required to compile and build the examples on <img src="./images/windowslogo.png" alt="" height="22px" valign="bottom"> Windows, <img src="./images/linuxlogo.png" alt="" height="24px" valign="bottom"> Linux, <img src="./images/androidlogo.png" alt="" height="24px" valign="bottom"> Android, <img src="./images/applelogo.png" alt="" valign="bottom" height="24px"> iOS and macOS (using MoltenVK) using a C++ compiler that supports C++11.
 
+This fork has been tested on: 
+- Intel 2017 MacBook Pro, macOS Monterey
+- Intel 2014 MacBook Pro, macOS Big Sur
+- M1 2020 MacBook Pr, macOS Monterey
+- Gigabyte BRIX GB-BMCE-5105, Intel Celeron, Intel UHD Graphics, Ubuntu 21.10
+- rasperrypi400 (Raspberry Pi 400, Rapsberry Pi OS Bullseye)
+
+The Macs and BRIX have been tested with the [Vulkan SDK 1.3.204](https://vulkan.lunarg.com/sdk/home).
+
+The Raspberry Pi required the lastest Vulkan enabled Mesa to be built.
+
 See [BUILD.md](BUILD.md) for details on how to build for the different platforms.
 
 ## Running
@@ -64,7 +75,7 @@ Once built, examples can be run from the bin directory. The list of available co
  --help: Show help
  -h, --height: Set window height
  -bt, --benchframetimes: Save frame times to benchmark results file
- -s, --shaders: Select shader type to use (glsl or hlsl)
+ -s, --shaders: Select shader type to use (glsl or hlsl) (This option will not work in this fork.)
  -b, --benchmark: Run example in benchmark mode
  -g, --gpu: Select GPU to run on
  -bf, --benchfilename: Set file name for benchmark results
