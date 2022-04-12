@@ -52,6 +52,8 @@ public:
         float clip_offset = 0;
         float clip_width = 100;
         float bgcolor[4]= {1.0f,1.0f,1.0f,1.0f};
+        float mag = 1.0f;
+        float magFactors[4] = {1.0f, 2.0f, 4.0f, 8.0f};
 
 	// Depth bias (and slope) are used to avoid shadowing artifacts
 	// Constant depth bias factor (always applied)
@@ -126,7 +128,7 @@ public:
 	VulkanExample() : VulkanExampleBase(ENABLE_VALIDATION)
 	{
             //Hmm, mouse rotates around origin (0,0,0) rather than where camera looks.
-		title = "Projected shadow mapping";
+		title = "glTF scenes with headless screenshot";
 		camera.type = Camera::CameraType::lookat;
 		camera.setPosition(glm::vec3(0.0f,0.0f,-60.0f));
 		camera.setRotation(glm::vec3(-0.0f, -0.0f, 0.0f));
@@ -698,7 +700,7 @@ public:
             pc.fog_end = fog_far-camera.position.z;
             pc.fogColor = fogColor;
 
-            VulkanHeadless *vulkanExample = new VulkanHeadless(filename,outputFilename,pc,width,height);
+            VulkanHeadless *vulkanExample = new VulkanHeadless(filename,outputFilename,pc,int(width*mag),int(height*mag));
             std::cout << "Finished" << std::endl;
             delete(vulkanExample);
 
@@ -933,6 +935,8 @@ public:
 			if (overlay->button("Take offscreen screenshot")) {
 				saveOffScreenScreenshot(sceneFileNames[sceneIndex],"headless.ppm");
                         }
+			if (overlay->inputFloat("..with magnification", &mag, 1.0, 2)) {
+			}
                         if (overlay->header("Fog/clip")) {
                             if (overlay->sliderFloat("Fog near",&fog_near,-50,50.)) {
                             }

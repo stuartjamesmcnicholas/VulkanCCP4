@@ -217,9 +217,19 @@ public:
 
                 VkPhysicalDeviceProperties pProperties;
                 vkGetPhysicalDeviceProperties(physicalDevice,&pProperties);
+                float ratio = float(width)/float(height);
+                std::cout << "Original width: " << width << ", height: " << height << ", ratio: " << ratio << std::endl;
                 std::cout << "Max image dimension " << pProperties.limits.maxImageDimension2D << std::endl;
-                if(width>pProperties.limits.maxImageDimension2D) width = pProperties.limits.maxImageDimension2D;
-                if(height>pProperties.limits.maxImageDimension2D) height = pProperties.limits.maxImageDimension2D;
+                if(width>pProperties.limits.maxImageDimension2D){
+                    width = pProperties.limits.maxImageDimension2D;
+                    height = pProperties.limits.maxImageDimension2D / ratio;
+                }
+                if(height>pProperties.limits.maxImageDimension2D) {
+                    height = pProperties.limits.maxImageDimension2D;
+                    width = pProperties.limits.maxImageDimension2D * ratio;
+                }
+
+                std::cout << "width: " << width << ", height: " << height << ", ratio: " << float(width)/float(height) << std::endl;
 
 		VkPhysicalDeviceProperties deviceProperties;
 		vkGetPhysicalDeviceProperties(physicalDevice, &deviceProperties);

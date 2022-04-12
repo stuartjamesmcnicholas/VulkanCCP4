@@ -30,8 +30,8 @@
 - [ ] File menu
 - [ ] Get rid of continuous loop (displayLinkOutputCb?)
 - [x] Rationalize ubo/pc in head(less) rendering
-- [ ] Create repository with build system.
-- [ ] Xlib interface.
+- [x] Create repository with build system.
+- [ ] Xlib interface, or whatever is required to hook into Gtk.
 - [ ] UI Preferences
   - [x] Fog/Clip
     - [x] UI
