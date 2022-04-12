@@ -5,7 +5,8 @@ a fork of Sasha Willems' base code and a couple of examples. The examples here r
 
 The only real changes are to permit rendering of different primitive types and the merging of glTF rendering and headless rendering.
 
-The aim is to continue merging aspects of different tutorial/examples to make fully featured program.
+The aim is to continue merging aspects of different tutorial/examples to make fully featured program. And also to load more typical
+crystallographic data types: PDB, mmCIF, mtz, map, etc.
 
 ## Table of Contents
 + [Official Khronos Vulkan Samples](#official-khronos-vulkan-samples)

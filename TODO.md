@@ -1,0 +1,70 @@
+- [ ] Platform
+    - [x] Intel 2017 MacBook Pro, macOS Monterey
+    - [x] Intel 2014 MacBook Pro, macOS Big Sur
+    - [x] M1 2020 MacBook Pr, macOS Monterey
+    - [x] Gigabyte BRIX GB-BMCE-5105, Intel Celeron, Intel UHD Graphics, Ubuntu 21.10
+    - [x] Raspberry Pi 400, Rapsberry Pi OS Bullseye
+    - [ ] Windows
+    - [ ] Android
+- [x] glTF
+  - [x] Get a `TRIANGLES_STRIP` into vulkan example
+  - [x] Split into specific meshes for each MG "display object"
+  - [x] Somehow flag up the different primitive types so that renderer knows what pipeline to use
+- [ ] Non-glTF data sources
+- [x] Screenshot
+  - [x] Onscreen screenshot
+  - [x] Offscreen screenshot
+    - [x] Render basic triangles
+    - [x] Basic lighting
+    - [x] 'Traditional' lines (as interim measure)
+    - [x] Triangle strips (ribbons, etc.)
+    - [x] Triangles (also ribbons, etc. from later versions of MG)
+    - [x] Call from onscreen program
+    - [x] Fog/Clip
+      - [x] Clip
+      - [x] Triangles fog
+      - [x] Lines fog
+    - [x] Background colour
+    - [x] Lighting
+- [ ] Command line file options
+- [ ] File menu
+- [ ] Get rid of continuous loop (displayLinkOutputCb?)
+- [x] Rationalize ubo/pc in head(less) rendering
+- [ ] Create repository with build system.
+- [ ] Xlib interface.
+- [ ] UI Preferences
+  - [x] Fog/Clip
+    - [x] UI
+    - [x] Wire up UI
+      - [x] Clip
+      - [x] Triangles fog
+      - [x] Lines fog
+  - [x] Background colour
+  - [ ] Lighting
+    - [ ] Position
+    - [ ] Specular
+    - [ ] Ambient
+    - [ ] Diffuse
+- [x] Basic lighting
+   - [x] Triangles shader
+   - [x] Line shader
+- [ ] Better camera
+- [ ] Multisampling
+- [ ] Shadows
+- [ ] Primitives
+  - [x] 'Traditional' lines (as interim measure)
+  - [x] Triangle strips (ribbons, etc.)
+  - [x] Triangles (also ribbons, etc. from later versions of MG)
+  - [ ] Thick lines
+  - [ ] Circles (2D)
+  - [ ] Imposter spheres
+  - [ ] Points
+  - [ ] Text 3D
+  - [ ] Text 2D
+  - [ ] Image overlays
+  - [ ] Legends
+  - [ ] Annotations
+- [ ] Skybox
+- [ ] Focus blur
+- [ ] Ambient occlusion
+- [ ] Depth-peel transparency
