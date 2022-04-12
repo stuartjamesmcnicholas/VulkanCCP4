@@ -1,7 +1,7 @@
 # glTF Vulkan C++ examples
 
 A couple of C++ examples for [Vulkan®](https://www.khronos.org/vulkan/), the new generation graphics and compute API from Khronos. This is
-a fork of Sasha Willems' base code and a couple of examples. The examples here render molecular graphics scenes in glTF files.
+a fork of Sascha Willems' base code and a couple of examples. The examples here render molecular graphics scenes in glTF files.
 
 The only real changes are to permit rendering of different primitive types and the merging of glTF rendering and headless rendering.
 
