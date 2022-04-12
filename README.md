@@ -63,14 +63,17 @@ After installing SDK (in my case in $HOME), the necessary environment variables 
 . $HOME/VulkanSDK/1.3.204.1/setup-env.sh
 ```
 
-The Raspberry Pi required the lastest Vulkan enabled Mesa to be built:
+The Raspberry Pi required the lastest Vulkan-enabled Mesa to be built:
 ```
 git clone -b 20.3 https://gitlab.freedesktop.org/mesa/mesa.git
 cd mesa
-meson --prefix /home/pi/local -Dgles1=disabled -Dgles2=enabled -Dplatforms=x11 -Dvulkan-drivers=broadcom -Ddri-drivers= -Dgallium-drivers=v3d,kmsro,vc4,virgl -Dbuildtype=release -Dc_args="$EXTRA_PARAM" -Dcpp_args="-mcpu=cortex-a72 -mfpu=neon-fp-armv8 -mfloat-abi=hard" build
+EXTRA_PARAM="-mcpu=cortex-a72 -mfpu=neon-fp-armv8 -mfloat-abi=hard"
+meson --prefix /home/pi/local -Dgles1=disabled -Dgles2=enabled -Dplatforms=x11 -Dvulkan-drivers=broadcom -Ddri-drivers= -Dgallium-drivers=v3d,kmsro,vc4,virgl -Dbuildtype=release -Dc_args="$EXTRA_PARAM" -Dcpp_args="$EXTRA_PARAM" build
 ninja -C build
 ninja -C build install
 ```
+
+I installed in `/home/pi/local`, you can do anywhere, I think even `/usr`.
 
 See [BUILD.md](BUILD.md) for details on how to build for the different platforms.
 
@@ -94,7 +97,8 @@ Once built, examples can be run from the bin directory. The list of available co
  -bw, --benchwarmup: Set warmup time for benchmark mode in seconds
 ```
 
-On the Pi, to make sure the correct driver is used set the following environment variables before running:
+On the Pi, to make sure the correct driver is used set the following environment variables before running. (``LD_LIBRARY_PATH`` may not be necessary, it
+depends where you installed the library`; ``VK_ICD_FILENAMES`` probably is required):
 ```
 export VK_ICD_FILENAMES=$HOME/local/share/vulkan/icd.d/broadcom_icd.armv7l.json
 export LD_LIBRARY_PATH=$HOME/local/lib/
