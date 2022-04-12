@@ -97,8 +97,8 @@ Once built, examples can be run from the bin directory. The list of available co
  -bw, --benchwarmup: Set warmup time for benchmark mode in seconds
 ```
 
-On the Pi, to make sure the correct driver is used set the following environment variables before running. (``LD_LIBRARY_PATH`` may not be necessary, it
-depends where you installed the library`; ``VK_ICD_FILENAMES`` probably is required):
+On the Pi, to make sure the correct driver is used set the following environment variables before running. (`LD_LIBRARY_PATH` may not be necessary, it
+depends where you installed the library; `VK_ICD_FILENAMES` probably is required):
 ```
 export VK_ICD_FILENAMES=$HOME/local/share/vulkan/icd.d/broadcom_icd.armv7l.json
 export LD_LIBRARY_PATH=$HOME/local/lib/
