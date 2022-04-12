@@ -1,8 +1,11 @@
 # Vulkan C++ examples and demos
 
-A comprehensive collection of open source C++ examples for [Vulkan®](https://www.khronos.org/vulkan/), the new generation graphics and compute API from Khronos.
+A couple of C++ examples for [Vulkan®](https://www.khronos.org/vulkan/), the new generation graphics and compute API from Khronos. This is
+a fork of Sasha Willems' base code and a couple of examples. The examples here render molecular graphics scenes in glTF files.
 
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=BHXPMV6ZKPH9E)
+The only real changes are to permit rendering of different primitive types and the merging of glTF rendering and headless rendering.
+
+The aim is to continue merging aspects of different tutorial/examples to make fully featured program.
 
 ## Table of Contents
 + [Official Khronos Vulkan Samples](#official-khronos-vulkan-samples)
@@ -22,8 +25,6 @@ Khronos recently made an official Vulkan Samples repository available to the pub
 
 You can find this repository at https://github.com/KhronosGroup/Vulkan-Samples
 
-As I've been involved with getting the official repository up and running, I'll be mostly contributing to that repository from now, but may still add samples that don't fit there in here and I'll of course continue to maintain these samples.
-
 ## Cloning
 This repository contains submodules for external dependencies, so when doing a fresh clone you need to clone recursively:
 
@@ -39,7 +40,7 @@ git submodule update
 ```
 
 ## Assets
-Many examples require assets from the asset pack that is not part of this repository due to file size. A python script is included to download the asset pack that. Run
+Many of the Willems examples require assets from the asset pack that is not part of this repository due to file size. A python script is included to download the asset pack that. Run
 
     python download_assets.py
 
@@ -90,16 +91,16 @@ These samples show how implement different features of the [glTF 2.0 3D format](
 
 #### [glTF model loading and rendering](examples/ccp4vulkan/)
 
-This is a modified version of Sascha Willem's original.
+This is a modified version of a Sascha Willems' example.
 
 Shows how to load a complete scene from a [glTF 2.0](https://github.com/KhronosGroup/glTF) file. The structure of the glTF 2.0 scene is converted into the data structures required to render the scene with Vulkan.
 
-this version loads a glTF scene from CCP4MG via intermediary jiffy; this modified version can also draw lines and triangle strips. Fog and clip
-sliders are provided.
+This version loads a glTF scene from CCP4MG (via an intermediary jiffy); this modified version can also draw lines and triangle strips. Fog and clip
+sliders are provided, and a background colour edit. It can output screenshots via copy of swap chain images or using headless rendering (see below).
 
 #### [glTF headless rendering](examples/renderheadless/)
 
-This is a modified version of Sascha Willem's renderheadless example, refactored so that it can load a glTF file and also be called from
+This is a modified version of Sascha Willems' `renderheadless` example, refactored so that it can load a glTF file and also be called from
 other programs, e.g. ccp4vulkan above.
 
 ## Credits and Attributions
