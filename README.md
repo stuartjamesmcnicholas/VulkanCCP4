@@ -76,7 +76,13 @@ ninja -C build install
 
 I installed in `/home/pi/local`, you can do anywhere, I think even `/usr`.
 
-See [BUILD.md](BUILD.md) for details on how to build for the different platforms.
+After (optionally) installing Vulkan SDK, simply do:
+```
+cmake .
+make
+```
+
+This fork has not yet been tested on Windows or Android. There are expected to be errors on Android.
 
 ## Running
 
@@ -104,8 +110,6 @@ depends where you installed the library; `VK_ICD_FILENAMES` probably is required
 export VK_ICD_FILENAMES=$HOME/local/share/vulkan/icd.d/broadcom_icd.armv7l.json
 export LD_LIBRARY_PATH=$HOME/local/lib/
 ```
-This fork has not yet been tested on Windows.
-
 ## Shaders
 
 Vulkan consumes shaders in an intermediate representation called SPIR-V. This makes it possible to use different shader languages by compiling them to that bytecode format. The shader language used here is [GLSL](data/shaders/glsl).
