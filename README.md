@@ -48,7 +48,7 @@ from the root of the repository after cloning or see [this](data/README.md) for 
 
 ## Building
 
-The repository contains everything required to compile and build the examples on <img src="./images/windowslogo.png" alt="" height="22px" valign="bottom"> Windows, <img src="./images/linuxlogo.png" alt="" height="24px" valign="bottom"> Linux, <img src="./images/androidlogo.png" alt="" height="24px" valign="bottom"> Android, <img src="./images/applelogo.png" alt="" valign="bottom" height="24px"> iOS and macOS (using MoltenVK) using a C++ compiler that supports C++11.
+The repository contains everything required to compile and build the examples on <img src="./images/windowslogo.png" alt="" height="22px" valign="bottom"> Windows, <img src="./images/linuxlogo.png" alt="" height="24px" valign="bottom"> Linux, <img src="./images/androidlogo.png" alt="" height="24px" valign="bottom"> Android, <img src="./images/applelogo.png" alt="" valign="bottom" height="24px"> iOS and macOS (using Vulkan SDK/MoltenVK) using a C++ compiler that supports C++11.
 
 This fork has been tested on: 
 - Intel 2017 MacBook Pro, macOS Monterey
@@ -62,6 +62,7 @@ After installing SDK (in my case in $HOME), the necessary environment variables 
 ```
 . $HOME/VulkanSDK/1.3.204.1/setup-env.sh
 ```
+Installing the SDK may not be necessary on Linux, the OS may have the required bits installed - Raspberry Pi OS does, see below.
 
 The Raspberry Pi required the lastest Vulkan-enabled Mesa to be built:
 ```
@@ -103,14 +104,15 @@ depends where you installed the library; `VK_ICD_FILENAMES` probably is required
 export VK_ICD_FILENAMES=$HOME/local/share/vulkan/icd.d/broadcom_icd.armv7l.json
 export LD_LIBRARY_PATH=$HOME/local/lib/
 ```
+This fork has not yet been tested on Windows.
 
 ## Shaders
 
-Vulkan consumes shaders in an intermediate representation called SPIR-V. This makes it possible to use different shader languages by compiling them to that bytecode format. The primary shader language used here is [GLSL](data/shaders/glsl) but thanks to an external contribution you'll also find [HLSL](data/shaders/hlsl) shader sources.
+Vulkan consumes shaders in an intermediate representation called SPIR-V. This makes it possible to use different shader languages by compiling them to that bytecode format. The shader language used here is [GLSL](data/shaders/glsl).
 
 ## A note on synchronization
 
-Synchronization in the master branch currently isn't optimal und uses ```vkDeviceQueueWaitIdle``` at the end of each frame. This is a heavy operation and is suboptimal in regards to having CPU and GPU operations run in parallel. I'm currently reworking this in the [this branch](https://github.com/SaschaWillems/Vulkan/tree/proper_sync_dynamic_cb). While still work-in-progress, if you're interested in a more proper way of synchronization in Vulkan, please take a look at that branch.
+Synchronization in the master branch currently isn't optimal und uses ```vkDeviceQueueWaitIdle``` at the end of each frame. This is a heavy operation and is suboptimal in regards to having CPU and GPU operations run in parallel. Sascha Willems is currently reworking this in the [this branch](https://github.com/SaschaWillems/Vulkan/tree/proper_sync_dynamic_cb). While still work-in-progress, if you're interested in a more proper way of synchronization in Vulkan, please take a look at that branch.
 
 
 ## Examples
