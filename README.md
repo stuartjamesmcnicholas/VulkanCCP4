@@ -142,3 +142,6 @@ other programs, e.g. ccp4vulkan above.
 
 ## Credits and Attributions
 See [CREDITS.md](CREDITS.md) for additional credits and attributions.
+
+## Screenshot
+![5a3h site and ribbons](images/screenshot.png)

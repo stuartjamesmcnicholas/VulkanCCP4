@@ -401,18 +401,18 @@ public:
 	void loadAssets()
 	{
 		const uint32_t glTFLoadingFlags = vkglTF::FileLoadingFlags::PreTransformVertices | vkglTF::FileLoadingFlags::PreMultiplyVertexColors | vkglTF::FileLoadingFlags::FlipY;
+                /*
 		scenes.resize(1);
 		scenes[0].loadFromFile(getAssetPath() + "models/1a3h_ribbons.gltf", vulkanDevice, queue, glTFLoadingFlags);
 		sceneNames = {"1a3h_ribbons" };
 		sceneFileNames = {getAssetPath() + "models/1a3h_ribbons.gltf"};
-                /*
+                */
 		scenes.resize(3);
 		scenes[0].loadFromFile(getAssetPath() + "models/1a3h_surface.gltf", vulkanDevice, queue, glTFLoadingFlags);
 		scenes[1].loadFromFile(getAssetPath() + "models/1a3h_ribbons.gltf", vulkanDevice, queue, glTFLoadingFlags);
 		scenes[2].loadFromFile(getAssetPath() + "models/ribbons.gltf", vulkanDevice, queue, glTFLoadingFlags);
 		sceneNames = {"1a3h surface","1a3h_ribbons","5a3h site and ribbons" };
 		sceneFileNames = {getAssetPath() + "models/1a3h_surface.gltf",getAssetPath() + "models/1a3h_ribbons.gltf",getAssetPath() + "models/ribbons.gltf" };
-                */
 	}
 
 	void setupDescriptorPool()
