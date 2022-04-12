@@ -1,4 +1,4 @@
-# Vulkan C++ examples and demos
+# glTF Vulkan C++ examples
 
 A couple of C++ examples for [Vulkan®](https://www.khronos.org/vulkan/), the new generation graphics and compute API from Khronos. This is
 a fork of Sasha Willems' base code and a couple of examples. The examples here render molecular graphics scenes in glTF files.
@@ -56,7 +56,7 @@ This fork has been tested on:
 - Intel 2014 MacBook Pro, macOS Big Sur
 - M1 2020 MacBook Pr, macOS Monterey
 - Gigabyte BRIX GB-BMCE-5105, Intel Celeron, Intel UHD Graphics, Ubuntu 21.10
-- rasperrypi400 (Raspberry Pi 400, Rapsberry Pi OS Bullseye)
+- Raspberry Pi 400, Rapsberry Pi OS Bullseye
 
 The Macs and BRIX have been tested with the [Vulkan SDK 1.3.204](https://vulkan.lunarg.com/sdk/home).  
 After installing SDK (in my case in $HOME), the necessary environment variables are setup with:
