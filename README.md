@@ -27,10 +27,8 @@ Khronos recently made an official Vulkan Samples repository available to the pub
 You can find this repository at https://github.com/KhronosGroup/Vulkan-Samples
 
 ## Cloning
-This repository contains submodules for external dependencies, so when doing a fresh clone you need to clone recursively:
-
 ```
-git clone --recursive https://github.com/SaschaWillems/Vulkan.git
+git clone --recursive https://github.com/stuartjamesmcnicholas/VulkanCCP4.git
 ```
 
 Existing repositories can be updated manually:
