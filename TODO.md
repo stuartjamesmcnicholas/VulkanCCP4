@@ -26,7 +26,7 @@
       - [x] Lines fog
     - [x] Background colour
     - [x] Lighting
-- [ ] Command line file options
+- [x] Command line file options
 - [ ] File menu
 - [ ] Get rid of continuous loop (displayLinkOutputCb?)
 - [x] Rationalize ubo/pc in head(less) rendering

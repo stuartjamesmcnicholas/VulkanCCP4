@@ -70,6 +70,8 @@ public:
 	std::vector<std::string> sceneFileNames;
 	int32_t sceneIndex = 0;
 
+        std::vector<std::string> filesin;
+
 	struct {
 		vks::Buffer scene;
 		vks::Buffer offscreen;
@@ -125,7 +127,7 @@ public:
 		VkDescriptorImageInfo descriptor;
 	} offscreenPass;
 
-	VulkanExample() : VulkanExampleBase(ENABLE_VALIDATION)
+	VulkanExample(const std::vector<std::string> &_filesin) : VulkanExampleBase(ENABLE_VALIDATION)
 	{
             //Hmm, mouse rotates around origin (0,0,0) rather than where camera looks.
 		title = "glTF scenes with headless screenshot";
@@ -134,6 +136,8 @@ public:
 		camera.setRotation(glm::vec3(-0.0f, -0.0f, 0.0f));
 		camera.setPerspective(30.0f, (float)width / (float)height, 1.0f, 256.0f);
 		timerSpeed *= 0.5f;
+                filesin = _filesin;
+                sceneNames = { "unknown" };
 	}
 
 	~VulkanExample()
@@ -340,7 +344,7 @@ public:
 
 				vkCmdBindPipeline(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.offscreen);
 				vkCmdBindDescriptorSets(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSets.offscreen, 0, nullptr);
-				scenes[sceneIndex].draw(drawCmdBuffers[i],0,0,1,TINYGLTF_MODE_TRIANGLE_STRIP);
+				if(scenes.size()>sceneIndex) scenes[sceneIndex].draw(drawCmdBuffers[i],0,0,1,TINYGLTF_MODE_TRIANGLE_STRIP);
 
 				vkCmdEndRenderPass(drawCmdBuffers[i]);
 			}
@@ -385,11 +389,11 @@ public:
 
                                 //OK We can now try binding different pipelines and then drawing with each in turn.
 				vkCmdBindPipeline(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, (filterPCF) ? pipelines.sceneShadowPCF : pipelines.sceneShadow);
-				scenes[sceneIndex].draw(drawCmdBuffers[i],0,0,1,TINYGLTF_MODE_TRIANGLE_STRIP);
+				if(scenes.size()>sceneIndex) scenes[sceneIndex].draw(drawCmdBuffers[i],0,0,1,TINYGLTF_MODE_TRIANGLE_STRIP);
 				vkCmdBindPipeline(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.sceneShadow_TRIANGLES);
-				scenes[sceneIndex].draw(drawCmdBuffers[i],0,0,1,TINYGLTF_MODE_TRIANGLES);
+				if(scenes.size()>sceneIndex) scenes[sceneIndex].draw(drawCmdBuffers[i],0,0,1,TINYGLTF_MODE_TRIANGLES);
 				vkCmdBindPipeline(drawCmdBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipelines.sceneShadow_LINE);
-				scenes[sceneIndex].draw(drawCmdBuffers[i],0,0,1,TINYGLTF_MODE_LINE);
+				if(scenes.size()>sceneIndex) scenes[sceneIndex].draw(drawCmdBuffers[i],0,0,1,TINYGLTF_MODE_LINE);
 
 				drawUI(drawCmdBuffers[i]);
 
@@ -403,18 +407,14 @@ public:
 	void loadAssets()
 	{
 		const uint32_t glTFLoadingFlags = vkglTF::FileLoadingFlags::PreTransformVertices | vkglTF::FileLoadingFlags::PreMultiplyVertexColors | vkglTF::FileLoadingFlags::FlipY;
-                /*
-		scenes.resize(1);
-		scenes[0].loadFromFile(getAssetPath() + "models/1a3h_ribbons.gltf", vulkanDevice, queue, glTFLoadingFlags);
-		sceneNames = {"1a3h_ribbons" };
-		sceneFileNames = {getAssetPath() + "models/1a3h_ribbons.gltf"};
-                */
-		scenes.resize(3);
-		scenes[0].loadFromFile(getAssetPath() + "models/1a3h_surface.gltf", vulkanDevice, queue, glTFLoadingFlags);
-		scenes[1].loadFromFile(getAssetPath() + "models/1a3h_ribbons.gltf", vulkanDevice, queue, glTFLoadingFlags);
-		scenes[2].loadFromFile(getAssetPath() + "models/ribbons.gltf", vulkanDevice, queue, glTFLoadingFlags);
-		sceneNames = {"1a3h surface","1a3h_ribbons","5a3h site and ribbons" };
-		sceneFileNames = {getAssetPath() + "models/1a3h_surface.gltf",getAssetPath() + "models/1a3h_ribbons.gltf",getAssetPath() + "models/ribbons.gltf" };
+                scenes.resize(filesin.size());
+                sceneNames.resize(filesin.size());
+                sceneFileNames.resize(filesin.size());
+                for(unsigned i=0;i<filesin.size();i++){
+                    scenes[i].loadFromFile(filesin[i], vulkanDevice, queue, glTFLoadingFlags);
+                    sceneNames[i] = filesin[i];
+                    sceneFileNames[i] = filesin[i];
+                }
 	}
 
 	void setupDescriptorPool()
@@ -953,4 +953,171 @@ public:
 	}
 };
 
-VULKAN_EXAMPLE_MAIN()
+#if defined(_WIN32)
+// Windows entry point
+LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	if (vulkanExample != NULL)
+	{
+		vulkanExample->handleMessages(hWnd, uMsg, wParam, lParam);
+	}
+	return (DefWindowProc(hWnd, uMsg, wParam, lParam));
+}																									\
+int APIENTRY WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
+{
+        std::vector<std::string> filesin;
+	for (size_t i = 0; i < __argc; i++) {
+            if(std::string(argv[i])==std::string("-filein")){
+                i++;
+                filesin.push_back(std::string(__argv[i]));
+            } else {
+                VulkanExample::args.push_back(__argv[i]);
+            }
+        }
+        
+	vulkanExample = new VulkanExample();
+	vulkanExample->initVulkan();
+	vulkanExample->setupWindow(hInstance, WndProc);
+	vulkanExample->prepare();
+	vulkanExample->renderLoop();
+	delete(vulkanExample);
+	return 0;
+}
+#elif defined(VK_USE_PLATFORM_ANDROID_KHR)
+// Android entry point
+VulkanExample *vulkanExample;
+void android_main(android_app* state)
+{
+	vulkanExample = new VulkanExample();
+	state->userData = vulkanExample;
+	state->onAppCmd = VulkanExample::handleAppCommand;
+	state->onInputEvent = VulkanExample::handleAppInput;
+	androidApp = state;
+	vks::android::getDeviceConfig();
+	vulkanExample->renderLoop();
+	delete(vulkanExample);
+}
+#elif defined(_DIRECT2DISPLAY)
+// Linux entry point with direct to display wsi
+VulkanExample *vulkanExample;
+static void handleEvent()
+{
+}
+int main(const int argc, const char *argv[])
+{
+        std::vector<std::string> filesin;
+	for (size_t i = 0; i < argc; i++) {
+            if(std::string(argv[i])==std::string("-filein")){
+                i++;
+                filesin.push_back(std::string(argv[i]));
+            } else {
+                VulkanExample::args.push_back(argv[i]);
+            }
+        }
+
+	vulkanExample = new VulkanExample();
+	vulkanExample->initVulkan();
+	vulkanExample->prepare();
+	vulkanExample->renderLoop();
+	delete(vulkanExample);
+	return 0;
+}
+#elif defined(VK_USE_PLATFORM_DIRECTFB_EXT)
+VulkanExample *vulkanExample;
+static void handleEvent(const DFBWindowEvent *event)
+{
+	if (vulkanExample != NULL)
+	{
+		vulkanExample->handleEvent(event);
+	}
+}
+int main(const int argc, const char *argv[])
+{
+        std::vector<std::string> filesin;
+	for (size_t i = 0; i < argc; i++) {
+            if(std::string(argv[i])==std::string("-filein")){
+                i++;
+                filesin.push_back(std::string(argv[i]));
+            } else {
+                VulkanExample::args.push_back(argv[i]);
+            }
+        }
+
+	vulkanExample = new VulkanExample();
+	vulkanExample->initVulkan();
+	vulkanExample->setupWindow();
+	vulkanExample->prepare();
+	vulkanExample->renderLoop();
+	delete(vulkanExample);
+	return 0;
+}
+#elif (defined(VK_USE_PLATFORM_WAYLAND_KHR) || defined(VK_USE_PLATFORM_HEADLESS_EXT))
+VulkanExample *vulkanExample;
+int main(const int argc, const char *argv[])
+{
+        std::vector<std::string> filesin;
+	for (size_t i = 0; i < argc; i++) {
+            if(std::string(argv[i])==std::string("-filein")){
+                i++;
+                filesin.push_back(std::string(argv[i]));
+            } else {
+                VulkanExample::args.push_back(argv[i]);
+            }
+        }
+	vulkanExample = new VulkanExample(filesin);
+	vulkanExample->initVulkan();
+	vulkanExample->setupWindow();
+	vulkanExample->prepare();
+	vulkanExample->renderLoop();
+	delete(vulkanExample);
+	return 0;
+}
+#elif defined(VK_USE_PLATFORM_XCB_KHR)
+VulkanExample *vulkanExample;
+static void handleEvent(const xcb_generic_event_t *event)
+{
+	if (vulkanExample != NULL)
+	{
+		vulkanExample->handleEvent(event);
+	}
+}
+int main(const int argc, const char *argv[])
+{
+	for (size_t i = 0; i < argc; i++) { VulkanExample::args.push_back(argv[i]); }; 
+	vulkanExample = new VulkanExample();
+	vulkanExample->initVulkan();
+	vulkanExample->setupWindow();
+	vulkanExample->prepare();
+	vulkanExample->renderLoop();
+	delete(vulkanExample);
+	return 0;
+}
+#elif (defined(VK_USE_PLATFORM_IOS_MVK) || defined(VK_USE_PLATFORM_MACOS_MVK))
+#if defined(VK_EXAMPLE_XCODE_GENERATED)
+VulkanExample *vulkanExample;
+int main(const int argc, const char *argv[])
+{
+    @autoreleasepool
+    {
+        std::vector<std::string> filesin;
+	for (size_t i = 0; i < argc; i++) {
+            if(std::string(argv[i])==std::string("-filein")){
+                i++;
+                filesin.push_back(std::string(argv[i]));
+            } else {
+                VulkanExample::args.push_back(argv[i]);
+            }
+        }
+	vulkanExample = new VulkanExample(filesin);
+        vulkanExample->initVulkan();
+        vulkanExample->setupWindow(nullptr);
+        vulkanExample->prepare();
+        vulkanExample->renderLoop();
+        delete(vulkanExample);
+        return 0;
+
+    }
+    return 0;
+}
+#endif
+#endif
