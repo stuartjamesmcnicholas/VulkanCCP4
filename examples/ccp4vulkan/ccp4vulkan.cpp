@@ -1083,8 +1083,16 @@ static void handleEvent(const xcb_generic_event_t *event)
 }
 int main(const int argc, const char *argv[])
 {
-	for (size_t i = 0; i < argc; i++) { VulkanExample::args.push_back(argv[i]); }; 
-	vulkanExample = new VulkanExample();
+        std::vector<std::string> filesin;
+	for (size_t i = 0; i < argc; i++) {
+            if(std::string(argv[i])==std::string("-filein")){
+                i++;
+                filesin.push_back(std::string(argv[i]));
+            } else {
+                VulkanExample::args.push_back(argv[i]);
+            }
+        }
+	vulkanExample = new VulkanExample(filesin);
 	vulkanExample->initVulkan();
 	vulkanExample->setupWindow();
 	vulkanExample->prepare();
