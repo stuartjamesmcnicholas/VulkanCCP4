@@ -82,7 +82,7 @@ make
 ```
 
 On Linux there are also other, experimental, ways to build, these are for testing Gtk4 integration. **See 'Running' information below.**
-- `cmake -DUSE_XLIB=1 .` This builds with Gtk with X11 backend support. This version is quite funcional, but Gtk does no more than create a Window.
+- `cmake -DUSE_XLIB=1 .` This builds with Gtk with X11 backend support. This version is quite functional, but Gtk does no more than create a Window.
 - `cmake -DUSE_WAYLAND_WSI=1 .` This builds the program to use Wayland surfaces, rather than X11. This is functional but has no window decorations.
 - `cmake -DUSE_WAYLAND_WSI=1 -DUSE_GTK=1 .` This builds with Gtk with Wayland backend support. This version is quite broken at the moment.
 
