@@ -17,6 +17,8 @@
 
 std::vector<const char*> VulkanExampleBase::args;
 
+void printBacktrace();
+
 VkResult VulkanExampleBase::createInstance(bool enableValidation)
 {
 	this->settings.validation = enableValidation;
@@ -45,6 +47,8 @@ VkResult VulkanExampleBase::createInstance(bool enableValidation)
 	instanceExtensions.push_back(VK_EXT_DIRECTFB_SURFACE_EXTENSION_NAME);
 #elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
 	instanceExtensions.push_back(VK_KHR_WAYLAND_SURFACE_EXTENSION_NAME);
+#elif defined(VK_USE_PLATFORM_XLIB_KHR)
+	instanceExtensions.push_back(VK_KHR_XLIB_SURFACE_EXTENSION_NAME);
 #elif defined(VK_USE_PLATFORM_XCB_KHR)
 	instanceExtensions.push_back(VK_KHR_XCB_SURFACE_EXTENSION_NAME);
 #elif defined(VK_USE_PLATFORM_IOS_MVK)
@@ -124,6 +128,61 @@ VkResult VulkanExampleBase::createInstance(bool enableValidation)
 	}
 	return vkCreateInstance(&instanceCreateInfo, nullptr, &instance);
 }
+
+#if defined(VK_USE_PLATFORM_WAYLAND_KHR) || defined(VK_USE_PLATFORM_XLIB_KHR)
+#if defined(_USE_GTK_) || defined(VK_USE_PLATFORM_XLIB_KHR)
+void VulkanExampleBase::draw_function (GtkDrawingArea *area, cairo_t        *cr, int             width, int             height, gpointer        user_data) {
+    //std::cout << "draw_function" << std::endl;
+    VulkanExampleBase *self = static_cast<VulkanExampleBase*>(user_data);
+    if(self->resizing) return;
+    int w = width;
+    int h = height;
+#if defined(VK_USE_PLATFORM_XLIB_KHR)
+    if(w!=self->width||h!=self->height||self->resizing){
+        //Do something somewhere else ..... ?
+        std::cout << "quit draw_function " << self->resizing << std::endl;
+        return;
+    }
+#endif
+    self->render();
+
+    /*
+    self->updateOverlay();
+    */
+    GtkStyleContext *context;
+
+    if(self->bitmap_data_valid){
+	    context = gtk_widget_get_style_context (GTK_WIDGET (area));
+	    GdkPixbuf* gdk_pixbuf = gdk_pixbuf_new_from_data((const guchar*)self->bitmap_data,GDK_COLORSPACE_RGB,TRUE,8,width,height,width*4,NULL,NULL);
+	    gdk_cairo_set_source_pixbuf (cr, gdk_pixbuf, 0, 0);
+    }
+
+    cairo_paint (cr);
+
+}
+#endif
+
+void VulkanExampleBase::setSize(int width, int height)
+{
+	if (width <= 0 || height <= 0)
+		return;
+
+	destWidth = width;
+	destHeight = height;
+
+	windowResize();
+}
+
+#if defined(_USE_GTK_) || defined(VK_USE_PLATFORM_XLIB_KHR)
+gboolean VulkanExampleBase::mouse_moved(GtkEventControllerMotion *event, gdouble x, gdouble y, gpointer user_data) {
+	VulkanExampleBase *self = static_cast<VulkanExampleBase*>(user_data);
+	self->mouseButtons.left = true;
+	self->handleMouseMove(int(x),int(y));
+	gtk_widget_queue_draw(self->widget);
+	return TRUE;
+}
+#endif
+#endif
 
 void VulkanExampleBase::renderFrame()
 {
@@ -801,6 +860,8 @@ VulkanExampleBase::VulkanExampleBase(bool enableValidation)
 
 #elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
 	initWaylandConnection();
+#elif defined(VK_USE_PLATFORM_XLIB_KHR)
+	initDisplay();
 #elif defined(VK_USE_PLATFORM_XCB_KHR)
 	initxcbConnection();
 #endif
@@ -2149,8 +2210,62 @@ void VulkanExampleBase::registryGlobal(wl_registry *registry, uint32_t name,
 {
 }
 
+#if defined(_USE_GTK_)
+void VulkanExampleBase::activate(GtkApplication* _app, gpointer user_data){
+    GtkWidget *window;
+    GtkWidget *box;
+
+    VulkanExampleBase *self = static_cast<VulkanExampleBase*>(user_data);
+    GtkWidget *widget;
+    window = gtk_application_window_new (_app);
+    gtk_window_set_title (GTK_WINDOW (window), "Window");
+    gtk_window_set_default_size (GTK_WINDOW (window), 800, 800);
+
+    widget = gtk_drawing_area_new();
+
+    box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+
+    gtk_widget_set_halign(box,GTK_ALIGN_FILL);
+    gtk_widget_set_valign(box,GTK_ALIGN_FILL);
+    gtk_widget_set_hexpand(widget,TRUE);
+    gtk_widget_set_vexpand(widget,TRUE);
+
+    gtk_window_set_child (GTK_WINDOW (window), box);
+    gtk_box_append (GTK_BOX (box), widget);
+
+    // FIXME - this is wrong! I need to create an (offscreen?) surface.
+    gtk_widget_show(window);
+    GtkNative *native = gtk_widget_get_native(widget);
+    GdkSurface *gdk_surface = gtk_native_get_surface(native);
+    GError *err = NULL;
+    self->surface = gdk_wayland_surface_get_wl_surface(gdk_surface);
+    if(!self->surface) printf("wl_surface is null\n");
+    GdkDisplay *gdk_display = gdk_display_get_default();
+    self->display = gdk_wayland_display_get_wl_display (gdk_display);
+    self->prepare();
+
+    self->widget = widget;
+
+    gtk_drawing_area_set_draw_func (GTK_DRAWING_AREA (widget), VulkanExampleBase::draw_function, self, NULL);
+
+    GtkEventController *motion = gtk_event_controller_motion_new();
+    gtk_widget_add_controller (widget, GTK_EVENT_CONTROLLER (motion));
+    g_signal_connect (motion, "motion", G_CALLBACK (VulkanExampleBase::mouse_moved), self);
+
+    double x;
+    double y;
+
+    gtk_native_get_surface_transform (native,&x,&y);
+    std::cout << x << " " << y << std::endl;
+    //struct wl_subsurface *subsurface;
+    //subsurface = wl_subcompositor_get_subsurface (display_wayland->subcompositor, impl->surface, parent_impl->surface);
+
+}
+#endif
+
 void VulkanExampleBase::initWaylandConnection()
 {
+#ifndef _USE_GTK_
 	display = wl_display_connect(NULL);
 	if (!display)
 	{
@@ -2183,17 +2298,7 @@ void VulkanExampleBase::initWaylandConnection()
 		std::cout << "WARNING: Input handling not available!\n";
 		fflush(stdout);
 	}
-}
-
-void VulkanExampleBase::setSize(int width, int height)
-{
-	if (width <= 0 || height <= 0)
-		return;
-
-	destWidth = width;
-	destHeight = height;
-
-	windowResize();
+#endif
 }
 
 static void
@@ -2236,8 +2341,15 @@ static const struct xdg_toplevel_listener xdg_toplevel_listener = {
 };
 
 
-struct xdg_surface *VulkanExampleBase::setupWindow()
+struct xdg_surface *VulkanExampleBase::setupWindow(const int argc, char *argv[])
 {
+#ifdef _USE_GTK_
+    int status;
+    app = gtk_application_new ("org.gtk.example", G_APPLICATION_FLAGS_NONE);
+    g_signal_connect (app, "activate", G_CALLBACK (VulkanExampleBase::activate), this);
+    status = g_application_run (G_APPLICATION (app), 0, NULL);
+    g_object_unref (app);
+#else
 	surface = wl_compositor_create_surface(compositor);
 	xdg_surface = xdg_wm_base_get_xdg_surface(shell, surface);
 
@@ -2249,8 +2361,70 @@ struct xdg_surface *VulkanExampleBase::setupWindow()
 	xdg_toplevel_set_title(xdg_toplevel, windowTitle.c_str());
 	wl_surface_commit(surface);
 	return xdg_surface;
+#endif
 }
 
+#elif defined(VK_USE_PLATFORM_XLIB_KHR)
+//TODO
+void VulkanExampleBase::doresize ( GtkGLArea* area, gint width, gint height, gpointer user_data){
+    VulkanExampleBase *self = static_cast<VulkanExampleBase*>(user_data);
+    self->resizing = true;
+    self->setSize(width,height);
+    self->resizing = false;
+}
+
+void VulkanExampleBase::activate(GtkApplication* _app, gpointer user_data){
+    GtkWidget *gtk_window;
+    GtkWidget *box;
+
+    VulkanExampleBase *self = static_cast<VulkanExampleBase*>(user_data);
+    GtkWidget *widget;
+    gtk_window = gtk_application_window_new (_app);
+    gtk_window_set_title (GTK_WINDOW (gtk_window), "Window");
+    gtk_window_set_default_size (GTK_WINDOW (gtk_window), 800, 800);
+
+    widget = gtk_drawing_area_new();
+
+    box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+
+    gtk_widget_set_halign(box,GTK_ALIGN_FILL);
+    gtk_widget_set_valign(box,GTK_ALIGN_FILL);
+    gtk_widget_set_hexpand(widget,TRUE);
+    gtk_widget_set_vexpand(widget,TRUE);
+
+    gtk_window_set_child (GTK_WINDOW (gtk_window), box);
+    gtk_box_append (GTK_BOX (box), widget);
+
+    gtk_widget_show(gtk_window);
+    GtkNative *native = gtk_widget_get_native(widget);
+    GdkSurface *gdk_surface = gtk_native_get_surface(native);
+
+//Must set GDK_BACKEND=x11 for thist to work!
+    self->window = GDK_SURFACE_XID(gdk_surface);
+    self->display = GDK_SURFACE_XDISPLAY(gdk_surface);
+    std::cout << "Window Id " << self->window << std::endl;
+    std::cout << "Display " << self->display << std::endl;
+    self->prepare();
+    self->widget = widget;
+    gtk_drawing_area_set_draw_func (GTK_DRAWING_AREA (widget), VulkanExampleBase::draw_function, self, NULL);
+
+    GtkEventController *motion = gtk_event_controller_motion_new();
+    gtk_widget_add_controller (widget, GTK_EVENT_CONTROLLER (motion));
+    g_signal_connect (motion, "motion", G_CALLBACK (VulkanExampleBase::mouse_moved), self);
+    g_signal_connect (widget, "resize", G_CALLBACK (VulkanExampleBase::doresize), self);
+}
+
+Window VulkanExampleBase::setupWindow(){
+    Window wid;
+    int status;
+    app = gtk_application_new ("org.gtk.example", G_APPLICATION_FLAGS_NONE);
+    g_signal_connect (app, "activate", G_CALLBACK (VulkanExampleBase::activate), this);
+    status = g_application_run (G_APPLICATION (app), 0, NULL);
+    g_object_unref (app);
+    return wid;
+}
+void VulkanExampleBase::initDisplay(){
+}
 #elif defined(VK_USE_PLATFORM_XCB_KHR)
 
 static inline xcb_intern_atom_reply_t* intern_atom_helper(xcb_connection_t *conn, bool only_if_exists, const char *str)
@@ -2747,6 +2921,8 @@ void VulkanExampleBase::initSwapchain()
 	swapChain.initSurface(dfb, surface);
 #elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
 	swapChain.initSurface(display, surface);
+#elif defined(VK_USE_PLATFORM_XLIB_KHR)
+	swapChain.initSurface(display, window);
 #elif defined(VK_USE_PLATFORM_XCB_KHR)
 	swapChain.initSurface(connection, window);
 #elif (defined(_DIRECT2DISPLAY) || defined(VK_USE_PLATFORM_HEADLESS_EXT))

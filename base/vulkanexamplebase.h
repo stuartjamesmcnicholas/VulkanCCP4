@@ -22,9 +22,17 @@
 #include "VulkanAndroid.h"
 #elif defined(VK_USE_PLATFORM_DIRECTFB_EXT)
 #include <directfb.h>
+#elif defined(VK_USE_PLATFORM_XLIB_KHR)
+#include <X11/Xlib.h>
+#include <gtk/gtk.h>
+#include <gdk/x11/gdkx.h> 
 #elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
 #include <wayland-client.h>
 #include "xdg-shell-client-protocol.h"
+#if defined(_USE_GTK_)
+#include <gtk/gtk.h>
+#include <gdk/wayland/gdkwayland.h> 
+#endif
 #elif defined(_DIRECT2DISPLAY)
 //
 #elif defined(VK_USE_PLATFORM_XCB_KHR)
@@ -174,6 +182,10 @@ protected:
 		VkSemaphore renderComplete;
 	} semaphores;
 	std::vector<VkFence> waitFences;
+
+	const char *bitmap_data=0;
+	bool bitmap_data_valid=false;
+
 public:
 	bool prepared = false;
 	bool resized = false;
@@ -261,6 +273,10 @@ public:
 	IDirectFBWindow *window = nullptr;
 	IDirectFBSurface *surface = nullptr;
 	IDirectFBEventBuffer *event_buffer = nullptr;
+#elif defined(VK_USE_PLATFORM_XLIB_KHR)
+	bool quit = false;
+        Display *display;
+        Window window;
 #elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
 	wl_display *display = nullptr;
 	wl_registry *registry = nullptr;
@@ -310,8 +326,18 @@ public:
 	IDirectFBSurface *setupWindow();
 	void handleEvent(const DFBWindowEvent *event);
 #elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
-	struct xdg_surface *setupWindow();
+	struct xdg_surface *setupWindow(const int argc, char *argv[]);
+#if defined(_USE_GTK_)
+        GtkApplication *app;
+	GtkWidget *widget;
+#endif
 	void initWaylandConnection();
+#if defined(_USE_GTK_)
+	static void draw_function (GtkDrawingArea *area, cairo_t        *cr, int             width, int             height, gpointer        user_data);
+	static void rerender(GtkWidget* _app, gpointer user_data);
+	static void activate(GtkApplication* _app, gpointer user_data);
+	static gboolean mouse_moved(GtkEventControllerMotion *event, gdouble x, gdouble y, gpointer user_data);
+#endif
 	void setSize(int width, int height);
 	static void registryGlobalCb(void *data, struct wl_registry *registry,
 			uint32_t name, const char *interface, uint32_t version);
@@ -354,6 +380,17 @@ public:
 
 #elif defined(_DIRECT2DISPLAY)
 //
+#elif defined(VK_USE_PLATFORM_XLIB_KHR)
+	Window setupWindow();
+	void initDisplay();
+        GtkApplication *app;
+	GtkWidget *widget;
+	static void activate(GtkApplication* _app, gpointer user_data);
+	static void draw_function (GtkDrawingArea *area, cairo_t        *cr, int             width, int             height, gpointer        user_data);
+	void setSize(int width, int height);
+	static gboolean mouse_moved(GtkEventControllerMotion *event, gdouble x, gdouble y, gpointer user_data);
+        static void doresize ( GtkGLArea* area, gint width, gint height, gpointer user_data);
+	//void handleEvent(const xcb_generic_event_t *event);
 #elif defined(VK_USE_PLATFORM_XCB_KHR)
 	xcb_window_t setupWindow();
 	void initxcbConnection();

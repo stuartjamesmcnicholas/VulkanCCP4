@@ -230,6 +230,9 @@ namespace vkglTF
 	};
 
 	enum FileLoadingFlags {
+#ifdef None
+#undef None
+#endif
 		None = 0x00000000,
 		PreTransformVertices = 0x00000001,
 		PreMultiplyVertexColors = 0x00000002,

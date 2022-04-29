@@ -24,7 +24,7 @@
 
 #include <execinfo.h>
 
-static inline void printBacktrace() {
+void printBacktrace() {
     void *stackBuffer[64]; 
     int numAddresses = backtrace((void**) &stackBuffer, 64); 
     char **addresses = backtrace_symbols(stackBuffer, numAddresses); 
@@ -630,7 +630,6 @@ public:
 		uboVSscene.depthBiasMVP = uboOffscreenVS.depthMVP;
 		fogColor = glm::vec4({bgcolor[0], bgcolor[1], bgcolor[2], bgcolor[3]});
 		uboVSscene.fogColor = glm::vec4({bgcolor[1], bgcolor[0], bgcolor[2], bgcolor[3]});
-                //FIXME - Wire up fog near and fog far
 		uboVSscene.fog_start = fog_near-camera.position.z;
 		uboVSscene.fog_end = fog_far-camera.position.z;
 		memcpy(uniformBuffers.scene.mapped, &uboVSscene, sizeof(uboVSscene));
@@ -660,6 +659,9 @@ public:
 		VK_CHECK_RESULT(vkQueueSubmit(queue, 1, &submitInfo, VK_NULL_HANDLE));
 
 		VulkanExampleBase::submitFrame();
+#if defined(_USE_GTK_) || defined(VK_USE_PLATFORM_XLIB_KHR)
+		getOrSavePixelData(NULL);
+#endif
 	}
 
 	void prepare()
@@ -707,7 +709,10 @@ public:
         }
 
 	void saveScreenshot(const char *filename){
-        std::cout << "hello" << std::endl;
+		getOrSavePixelData(filename);
+	}
+
+	void getOrSavePixelData(const char *filename){
 		//screenshotSaved = false;
 		bool supportsBlit = true;
 
@@ -867,6 +872,13 @@ public:
 		const char* data;
 		vkMapMemory(device, dstImageMemory, 0, VK_WHOLE_SIZE, 0, (void**)&data);
 		data += subResourceLayout.offset;
+
+                bitmap_data = data;
+		bitmap_data_valid=true;
+		if(!filename){
+			//FIXME = dstImageMemory leak!!
+			return;
+		}
 
 		std::ofstream file(filename, std::ios::out | std::ios::binary);
 
@@ -1051,7 +1063,32 @@ int main(const int argc, const char *argv[])
 	delete(vulkanExample);
 	return 0;
 }
-#elif (defined(VK_USE_PLATFORM_WAYLAND_KHR) || defined(VK_USE_PLATFORM_HEADLESS_EXT))
+#elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
+VulkanExample *vulkanExample;
+int main(const int argc, char *argv[])
+{
+        std::vector<std::string> filesin;
+	for (size_t i = 0; i < argc; i++) {
+            if(std::string(argv[i])==std::string("-filein")){
+                i++;
+                filesin.push_back(std::string(argv[i]));
+            } else {
+                VulkanExample::args.push_back(argv[i]);
+            }
+        }
+	vulkanExample = new VulkanExample(filesin);
+
+	vulkanExample->initVulkan();
+	vulkanExample->setupWindow(argc, argv);
+
+#if !defined(_USE_GTK_)
+	vulkanExample->prepare();
+	vulkanExample->renderLoop();
+	delete(vulkanExample);
+#endif
+	return 0;
+}
+#elif defined(VK_USE_PLATFORM_HEADLESS_EXT)
 VulkanExample *vulkanExample;
 int main(const int argc, const char *argv[])
 {
@@ -1065,11 +1102,38 @@ int main(const int argc, const char *argv[])
             }
         }
 	vulkanExample = new VulkanExample(filesin);
+
 	vulkanExample->initVulkan();
 	vulkanExample->setupWindow();
 	vulkanExample->prepare();
 	vulkanExample->renderLoop();
 	delete(vulkanExample);
+	return 0;
+}
+#elif defined(VK_USE_PLATFORM_XLIB_KHR)
+VulkanExample *vulkanExample;
+int main(const int argc, const char *argv[])
+{
+        std::vector<std::string> filesin;
+	for (size_t i = 0; i < argc; i++) {
+            if(std::string(argv[i])==std::string("-filein")){
+                i++;
+                filesin.push_back(std::string(argv[i]));
+            } else {
+                VulkanExample::args.push_back(argv[i]);
+            }
+        }
+        std::cout << "Create example" << std::endl;
+	vulkanExample = new VulkanExample(filesin);
+        std::cout << "initvulkan" << std::endl;
+	vulkanExample->initVulkan();
+        std::cout << "setupWindow" << std::endl;
+	vulkanExample->setupWindow();
+        //std::cout << "prepare" << std::endl;
+	//vulkanExample->prepare();
+        //std::cout << "renderLoop" << std::endl;
+	//vulkanExample->renderLoop();
+	//delete(vulkanExample);
 	return 0;
 }
 #elif defined(VK_USE_PLATFORM_XCB_KHR)

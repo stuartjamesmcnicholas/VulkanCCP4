@@ -60,6 +60,8 @@ public:
 	void initSurface(ANativeWindow* window);
 #elif defined(VK_USE_PLATFORM_DIRECTFB_EXT)
 	void initSurface(IDirectFB* dfb, IDirectFBSurface* window);
+#elif defined(VK_USE_PLATFORM_XLIB_KHR)
+	void initSurface(Display* display, Window window);
 #elif defined(VK_USE_PLATFORM_WAYLAND_KHR)
 	void initSurface(wl_display* display, wl_surface* window);
 #elif defined(VK_USE_PLATFORM_XCB_KHR)

@@ -81,11 +81,25 @@ cmake .
 make
 ```
 
+On Linux there are also other, experimental, ways to build, these are for testing Gtk4 integration. **See 'Running' information below.**
+- `cmake -DUSE_XLIB=1 .` This builds with Gtk with X11 backend support. This version is quite funcional, but Gtk does no more than create a Window.
+- `cmake -DUSE_WAYLAND_WSI=1 .` This builds the program to use Wayland surfaces, rather than X11. This is functional but has no window decorations.
+- `cmake -DUSE_WAYLAND_WSI=1 -DUSE_GTK=1 .` This builds with Gtk with Wayland backend support. This version is quite broken at the moment.
+
 This fork has not yet been tested on Windows or Android. There are expected to be errors on Android.
 
 ## Running
 
-Once built, examples can be run from the bin directory. The list of available command line options can be brought up with `--help`:
+run with e.g.:
+
+```
+bin/ccp4vulkan -filein data/models/ribbons.gltf
+```
+
+Multiple `-filein` options can be given.
+
+The list of available command line options can be brought up with `--help` **Not all of these have any
+effect in the CCP4Vulkan fork!**:
 ```
  -v, --validation: Enable validation layers
  -br, --benchruntime: Set duration time for benchmark mode in seconds
@@ -109,6 +123,14 @@ depends where you installed the library; `VK_ICD_FILENAMES` probably is required
 export VK_ICD_FILENAMES=$HOME/local/share/vulkan/icd.d/broadcom_icd.armv7l.json
 export LD_LIBRARY_PATH=$HOME/local/lib/
 ```
+
+If you have built one of the experimental versions, there are important enviroment variables that must be set:
+
+- If you configured with `cmake -DUSE_XLIB=1 .` , then you must run with e.g.:
+```GSK_RENDERER=cairo GDK_BACKEND=x11 bin/ccp4vulkan -filein data/models/ribbons.gltf```
+- If you configured with `cmake -DUSE_WAYLAND_WSI=1 -DUSE_GTK=1 .` , then you must run with e.g.: 
+```GDK_BACKEND=wayland bin/ccp4vulkan -filein data/models/ribbons.gltf```
+
 ## Shaders
 
 Vulkan consumes shaders in an intermediate representation called SPIR-V. This makes it possible to use different shader languages by compiling them to that bytecode format. The shader language used here is [GLSL](data/shaders/glsl).
